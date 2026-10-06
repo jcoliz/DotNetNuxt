@@ -16,4 +16,23 @@ public static class HostingExtensions
 
         return startupOptions;
     }
+
+    public static IServiceCollection AddStandardCorsPolicy(this IServiceCollection services, string[] allowedOrigins)
+    {
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials()
+                    // Expose content-disposition header for file downloads
+                    // so the client can read the filename from the response
+                    .WithExposedHeaders("content-disposition");
+            });
+        });
+
+        return services;
+    }
 }
