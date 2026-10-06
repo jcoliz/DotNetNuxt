@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Hosting/">
+    <Project Path="src/Hosting/DotNetNuxt.Hosting.csproj" />
+  </Folder>
+</Solution>
