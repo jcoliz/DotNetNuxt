@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/AspNetCore/">
+    <Project Path="src/AspNetCore/DotNetNuxt.AspNetCore.csproj" />
+  </Folder>
   <Folder Name="/src/Hosting/">
     <Project Path="src/Hosting/DotNetNuxt.Hosting.csproj" />
   </Folder>
