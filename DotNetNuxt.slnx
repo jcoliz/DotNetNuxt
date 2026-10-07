@@ -6,4 +6,8 @@
   <Folder Name="/src/Hosting/">
     <Project Path="src/Hosting/DotNetNuxt.Hosting.csproj" />
   </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/Unit/">
+    <Project Path="tests/Unit/DotNetNuxt.Tests.Unit.csproj" />
+  </Folder>
 </Solution>
