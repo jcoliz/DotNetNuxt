@@ -1,1 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<PackageId>DotNetNuxt.AspNetCore</PackageId>
+		<Description>ASP.NET Core integration helpers and middleware for ASP.NET applications with a Nuxt frontend.</Description>
+		<PackageTags>dotnet;aspnetcore;nuxt;middleware;web</PackageTags>
+	</PropertyGroup>
+
+</Project>

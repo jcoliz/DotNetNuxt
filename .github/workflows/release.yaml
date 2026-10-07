@@ -1,0 +1,62 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Package version (for manual runs)
+        required: true
+        type: string
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v7
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 10.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build and Test
+      run: dotnet test /p:Configuration=Release --verbosity normal
+
+    - name: Resolve package version
+      id: version
+      shell: bash
+      run: |
+        if [ "${{ github.event_name }}" = "release" ]; then
+          VERSION="${{ github.event.release.tag_name }}"
+        else
+          VERSION="${{ github.event.inputs.version }}"
+        fi
+        VERSION="${VERSION#v}"
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "Publishing version: $VERSION"
+
+    - name: Pack DotNetNuxt.AspNetCore
+      run: dotnet pack ./src/AspNetCore/DotNetNuxt.AspNetCore.csproj --no-build /p:Configuration=Release /p:Version=${{ steps.version.outputs.version }} /p:PackageReleaseNotes="${{ github.event.release.body || '' }}" --output ./artifacts/packages --verbosity normal
+
+    - name: Pack DotNetNuxt.Hosting
+      run: dotnet pack ./src/Hosting/DotNetNuxt.Hosting.csproj --no-build /p:Configuration=Release /p:Version=${{ steps.version.outputs.version }} /p:PackageReleaseNotes="${{ github.event.release.body || '' }}" --output ./artifacts/packages --verbosity normal
+
+    - name: Publish NuGets (if this version not published before)
+      run: dotnet nuget push "./artifacts/packages/*.nupkg" -s https://api.nuget.org/v3/index.json -k ${{ secrets.NUGET_API_KEY }} --skip-duplicate
+
+    - name: Upload packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        path: ./artifacts/packages/*.nupkg
+
+    - name: Upload symbols
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-symbols
+        path: ./artifacts/packages/*.snupkg
+        if-no-files-found: ignore

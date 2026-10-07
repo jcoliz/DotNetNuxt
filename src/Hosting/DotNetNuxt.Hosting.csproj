@@ -1,1 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<IsPackable>true</IsPackable>
+		<PackageId>DotNetNuxt.Hosting</PackageId>
+		<Description>Hosting extensions and startup helpers for running ASP.NET applications with a Nuxt frontend.</Description>
+		<PackageTags>dotnet;hosting;nuxt;extensions;web</PackageTags>
+	</PropertyGroup>
+
+</Project>
