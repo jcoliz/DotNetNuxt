@@ -12,7 +12,7 @@ namespace DotNetNuxt.EntityFrameworkCore;
 /// <summary>
 /// Abstract DbContext that implements commonly-shared IDataProvider operations
 /// </summary>
-public abstract class StandardDbContext(DbContextOptions<StandardDbContext> options) : IdentityDbContext(options), IDataProvider 
+public abstract class StandardDbContext(DbContextOptions options) : IdentityDbContext(options), IDataProvider 
 {
 
     #region Query Builders
