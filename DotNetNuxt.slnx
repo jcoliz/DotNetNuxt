@@ -1,5 +1,8 @@
 <Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/Abstractions/">
+    <Project Path="src/Abstractions/DotNetNuxt.Abstractions.csproj" />
+  </Folder>
   <Folder Name="/src/AspNetCore/">
     <Project Path="src/AspNetCore/DotNetNuxt.AspNetCore.csproj" />
   </Folder>
