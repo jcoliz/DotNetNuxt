@@ -12,12 +12,12 @@ namespace DotNetNuxt.EntityFrameworkCore;
 /// <summary>
 /// Abstract DbContext that implements commonly-shared IDataProvider operations
 /// </summary>
-public abstract class StandardDbContext(DbContextOptions options) : IdentityDbContext(options), IDataProvider 
+public abstract class StandardDbContext(DbContextOptions options) : DbContext(options), IDataProvider
 {
 
     #region Query Builders
 
-    IQueryable<T> IDataProvider.Get<T>() 
+    IQueryable<T> IDataProvider.Get<T>()
         => base.Set<T>();
 
     /// <summary>
@@ -35,46 +35,46 @@ public abstract class StandardDbContext(DbContextOptions options) : IdentityDbCo
 
     #region Modifiers
 
-    void IDataProvider.Add(object item) 
+    void IDataProvider.Add(object item)
         => base.Add(item);
-    
-    void IDataProvider.Update(object item) 
+
+    void IDataProvider.Update(object item)
         => base.Update(item);
-    
-    void IDataProvider.Remove(object item) 
+
+    void IDataProvider.Remove(object item)
         => base.Remove(item);
 
-    Task<int> IDataProvider.ClearAsync<T>() 
+    Task<int> IDataProvider.ClearAsync<T>()
         => throw new NotImplementedException();
 
     #endregion
 
     #region Query Runners
 
-    Task<List<T>> IDataProvider.ToListNoTrackingAsync<T>(IQueryable<T> query)    
-        => query.AsNoTracking().ToListAsync(); 
+    Task<List<T>> IDataProvider.ToListNoTrackingAsync<T>(IQueryable<T> query)
+        => query.AsNoTracking().ToListAsync();
 
-    Task<List<T>> IDataProvider.ToListAsync<T>(IQueryable<T> query) 
+    Task<List<T>> IDataProvider.ToListAsync<T>(IQueryable<T> query)
         => query.ToListAsync();
 
     Task<int> IDataProvider.CountAsync<T>(IQueryable<T> query)
         => query.CountAsync();
 
-    Task<bool> IDataProvider.AnyAsync<T>(IQueryable<T> query) 
+    Task<bool> IDataProvider.AnyAsync<T>(IQueryable<T> query)
         => query.AnyAsync();
 
     #endregion
 
     #region Bulk Operations
-    
-    Task IDataProvider.BulkInsertAsync<T>(IList<T> items) 
+
+    Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
         => throw new NotImplementedException();
-    
+
     Task<int> IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)
     {
         return items.ExecuteDeleteAsync();
     }
-    
+
     /// <summary>
     /// Update multiple columns at once
     /// </summary>
