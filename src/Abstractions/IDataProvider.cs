@@ -41,7 +41,7 @@ public interface IDataProvider
     /// Add an item
     /// </summary>
     /// <param name="item">Item to add</param>
-    void Add(object item);
+    void Add(IModel item);
 
     /// <summary>
     /// Add a range of items
