@@ -79,10 +79,8 @@ public abstract class StandardDbContext(DbContextOptions options) : DbContext(op
     Task IDataProvider.BulkInsertAsync<T>(IList<T> items)
         => throw new NotImplementedException();
 
-    Task<int> IDataProvider.BulkDeleteAsync<T>(IQueryable<T> items)
-    {
-        return items.ExecuteDeleteAsync();
-    }
+    Task<int> IDataProvider.BulkDeleteAsync<T>(IQueryable<T> query)
+        => query.ExecuteDeleteAsync();
 
     /// <summary>
     /// Update multiple columns at once
