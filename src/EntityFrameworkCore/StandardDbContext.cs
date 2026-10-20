@@ -38,11 +38,20 @@ public abstract class StandardDbContext(DbContextOptions options) : DbContext(op
     void IDataProvider.Add(IModel item) 
         => base.Add(item);
 
-    void IDataProvider.Update(object item)
+    void IDataProvider.AddRange(IEnumerable<IModel> items)
+        => base.AddRange(items);
+
+    void IDataProvider.Update(IModel item)
         => base.Update(item);
 
-    void IDataProvider.Remove(object item)
+    void IDataProvider.UpdateRange(IEnumerable<IModel> items)
+        => base.UpdateRange(items);
+
+    void IDataProvider.Remove(IModel item)
         => base.Remove(item);
+
+    void IDataProvider.RemoveRange(IEnumerable<IModel> items)
+        => base.RemoveRange(items);
 
     Task<int> IDataProvider.ClearAsync<T>()
         => throw new NotImplementedException();

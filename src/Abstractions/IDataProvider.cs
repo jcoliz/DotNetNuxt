@@ -47,31 +47,31 @@ public interface IDataProvider
     /// Add a range of items
     /// </summary>
     /// <param name="items">Items to add</param>
-    void AddRange(IEnumerable<object> items);
+    void AddRange(IEnumerable<IModel> items);
     
     /// <summary>
     /// Update an item
     /// </summary>
     /// <param name="item">Item to update</param>
-    void Update(object item);
+    void Update(IModel item);
     
     /// <summary>
     /// Update a range of items
     /// </summary>
     /// <param name="items">Items to update</param>
-    void UpdateRange(IEnumerable<object> items);
+    void UpdateRange(IEnumerable<IModel> items);
     
     /// <summary>
     /// Remove an item
     /// </summary>
     /// <param name="item">Item to remove</param>
-    void Remove(object item);
+    void Remove(IModel item);
     
     /// <summary>
     /// Remove items
     /// </summary>
     /// <param name="items">Items to remove</param>
-    void RemoveRange(IEnumerable<object> items);
+    void RemoveRange(IEnumerable<IModel> items);
 
     /// <summary>
     /// Clear all items from a particular table
@@ -96,7 +96,7 @@ public interface IDataProvider
     /// <summary>
     /// Execute ToList query asynchronously, with no tracking
     /// </summary>
-    /// <typeparam name="T">Type of entities being queried</typeparam>
+    /// <typeparam name="T">Reference type of entities being queried</typeparam>
     /// <param name="query">Query to execute</param>
     /// <returns>List of items</returns>
     Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class;
@@ -108,7 +108,7 @@ public interface IDataProvider
     /// <typeparam name="T">Type of entities being queried</typeparam>
     /// <param name="query">Query to execute</param>
     /// <returns>Number of items in <paramref name="query"/></returns>
-    Task<int> CountAsync<T>(IQueryable<T> query) where T : IModel;
+    Task<int> CountAsync<T>(IQueryable<T> query);
 
     /// <summary>
     /// Execute "Any" query asynchronously
@@ -116,7 +116,7 @@ public interface IDataProvider
     /// <typeparam name="T">Type of entities being queried</typeparam>
     /// <param name="query">Query to execute</param>
     /// <returns>Whether there are any items in <paramref name="query"/></returns>
-    Task<bool> AnyAsync<T>(IQueryable<T> query) where T : IModel;
+    Task<bool> AnyAsync<T>(IQueryable<T> query);
 
     #endregion
 
