@@ -76,9 +76,9 @@ public interface IDataProvider
     /// <summary>
     /// Clear all items from a particular table
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">Reference type of entities to clear</typeparam>
     /// <returns></returns>
-    Task<int> ClearAsync<T>() where T : IModel;
+    Task<int> ClearAsync<T>() where T : class, IModel;
 
     /// <summary>
     /// Save changes previously made

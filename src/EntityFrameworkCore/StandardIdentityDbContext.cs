@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace DotNetNuxt.EntityFrameworkCore;
 
@@ -54,7 +55,7 @@ public abstract class StandardIdentityDbContext(DbContextOptions options) : Iden
         => base.RemoveRange(items);
 
     Task<int> IDataProvider.ClearAsync<T>()
-        => throw new NotImplementedException();
+        => base.Set<T>().ExecuteDeleteAsync();
 
     #endregion
 
@@ -65,6 +66,9 @@ public abstract class StandardIdentityDbContext(DbContextOptions options) : Iden
 
     Task<List<T>> IDataProvider.ToListAsync<T>(IQueryable<T> query)
         => query.ToListAsync();
+
+    Task<T?> IDataProvider.SingleOrDefaultAsync<T>(IQueryable<T> query) where T : class
+        => query.SingleOrDefaultAsync();
 
     Task<int> IDataProvider.CountAsync<T>(IQueryable<T> query)
         => query.CountAsync();
@@ -84,21 +88,16 @@ public abstract class StandardIdentityDbContext(DbContextOptions options) : Iden
         return items.ExecuteDeleteAsync();
     }
 
-    /// <summary>
-    /// Update multiple columns at once
-    /// </summary>
-    /// <remarks>
-    /// This implementation allows the callers to avoid the EF Core-specific
-    /// `SetPropertyCalls` symbol, and instead stick to generic symbols. Then,
-    /// this implementation can be specialized by derived classes.
-    /// </remarks>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="items"></param>
-    /// <param name="newValues"></param>
-    /// <param name="columns"></param>
-    /// <returns></returns>
-    public abstract Task<int> BulkUpdateAsync<T>(IQueryable<T> items, T newValues, List<string> columns)
-        where T : IModel;
+    Task<int> IDataProvider.BulkUpdateAsync<TEntity, TProperty>(
+        IQueryable<TEntity> query,
+        Expression<Func<TEntity, TProperty>> propertySelector,
+        TProperty newValue,
+        CancellationToken cancellationToken)
+    {
+        return query.ExecuteUpdateAsync(
+            setters => setters.SetProperty(propertySelector, newValue),
+            cancellationToken);
+    }
 
     #endregion
 }
