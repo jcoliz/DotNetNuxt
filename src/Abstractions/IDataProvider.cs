@@ -14,7 +14,7 @@ public interface IDataProvider
     #region Query Builders
 
     /// <summary>
-    /// Get a query of <typeparamref name="T"/> entities 
+    /// Get a query of <typeparamref name="T"/> entities
     /// </summary>
     /// <remarks>
     /// Returning a query allows us to further refine the query before executing it
@@ -23,7 +23,7 @@ public interface IDataProvider
     IQueryable<T> Get<T>() where T : class, IModel;
 
     /// <summary>
-    /// Get a query of <typeparamref name="TEntity"/> entities, 
+    /// Get a query of <typeparamref name="TEntity"/> entities,
     /// including <typeparamref name="TProperty"/> navigation properties
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
@@ -48,25 +48,25 @@ public interface IDataProvider
     /// </summary>
     /// <param name="items">Items to add</param>
     void AddRange(IEnumerable<IModel> items);
-    
+
     /// <summary>
     /// Update an item
     /// </summary>
     /// <param name="item">Item to update</param>
     void Update(IModel item);
-    
+
     /// <summary>
     /// Update a range of items
     /// </summary>
     /// <param name="items">Items to update</param>
     void UpdateRange(IEnumerable<IModel> items);
-    
+
     /// <summary>
     /// Remove an item
     /// </summary>
     /// <param name="item">Item to remove</param>
     void Remove(IModel item);
-    
+
     /// <summary>
     /// Remove items
     /// </summary>
@@ -101,6 +101,14 @@ public interface IDataProvider
     /// <returns>List of items</returns>
     Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class;
     Task<List<T>> ToListAsync<T>(IQueryable<T> query);
+
+    /// <summary>
+    /// Execute SingleOrDefault query asynchronously
+    /// </summary>
+    /// <typeparam name="T">Reference type of entities being queried</typeparam>
+    /// <param name="query">Query to execute</param>
+    /// <returns>Single item or default</returns>
+    Task<T?> SingleOrDefaultAsync<T>(IQueryable<T> query) where T : class;
 
     /// <summary>
     /// Execute Count query asynchronously
@@ -144,17 +152,20 @@ public interface IDataProvider
     Task<int> BulkDeleteAsync<T>(IQueryable<T> items) where T : IModel;
 
     /// <summary>
-    /// Update many items en masse
+    /// Update many items en masse for a specific property
     /// </summary>
-    /// <remarks>
-    /// This is much more efficient than doing it one at a time
-    /// </remarks>
-    /// <typeparam name="T">Type of items</typeparam>
-    /// <param name="items">Items to be updated</param>
-    /// <param name="newValues">Type T object with affected fields set to new values</param>
-    /// <param name="columns">List of affected fields</param>
+    /// <typeparam name="TEntity">Type of the entity being updated</typeparam>
+    /// <typeparam name="TProperty">Type of the property being updated</typeparam>
+    /// <param name="query">Query specifying which entities to update</param>
+    /// <param name="propertySelector">Expression selecting the property to update</param>
+    /// <param name="newValue">New value to set for the selected property</param>
+    /// <param name="cancellationToken">Cancellation token for the operation</param>
     /// <returns>Number of affected items</returns>
-    Task<int> BulkUpdateAsync<T>(IQueryable<T> items, T newValues, List<string> columns) where T : IModel;
+    Task<int> BulkUpdateAsync<TEntity, TProperty>(
+        IQueryable<TEntity> query,
+        Expression<Func<TEntity, TProperty>> propertySelector,
+        TProperty newValue,
+        CancellationToken cancellationToken) where TEntity : IModel;
 
     #endregion
 }
