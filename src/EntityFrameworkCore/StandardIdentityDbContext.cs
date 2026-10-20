@@ -35,7 +35,7 @@ public abstract class StandardIdentityDbContext(DbContextOptions options) : Iden
 
     #region Modifiers
 
-    void IDataProvider.Add(object item)
+    void IDataProvider.Add(IModel item) 
         => base.Add(item);
 
     void IDataProvider.Update(object item)
