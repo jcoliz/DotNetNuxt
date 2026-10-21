@@ -110,14 +110,21 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
 
         if (logEntry.Exception != null)
         {
-            textWriter.WriteLine
-            (
-                // INF 02/21 02:02:48 [1003] Views.Shop: OK 0 items in 0 super groups
-                "                EXCEPTION {0}: {1}",
-                logEntry.Exception.GetType().Name,
-                logEntry.Exception.Message
-            );
-            textWriter.WriteLine(logEntry.Exception.StackTrace);
+            if (_options.IncludeFullException)
+            {
+                textWriter.WriteLine(logEntry.Exception.ToString());
+            }
+            else
+            {
+                textWriter.WriteLine
+                (
+                    // INF 02/21 02:02:48 [1003] Views.Shop: OK 0 items in 0 super groups
+                    "                EXCEPTION {0}: {1}",
+                    logEntry.Exception.GetType().Name,
+                    logEntry.Exception.Message
+                );
+                textWriter.WriteLine(logEntry.Exception.StackTrace);
+            }
             textWriter.WriteLine();
         }
 
@@ -153,11 +160,17 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
 /// <summary>
 /// Formatter options
 /// </summary>
-/// <remarks>
-/// Seems like I can't have a formatter with NO options??
-/// </remarks>
 public sealed class TerseConsoleLogOptions : ConsoleFormatterOptions
 {
+    /// <summary>
+    /// Gets or sets whether to render exceptions using their full string representation,
+    /// including inner exceptions and their stack traces. Defaults to false.
+    /// </summary>
+    /// <remarks>
+    /// Leave disabled for terse console output when another logging sink, such as
+    /// Aspire or Application Insights, captures full exception details.
+    /// </remarks>
+    public bool IncludeFullException { get; set; } = false;
 }
 
 /// <summary>
