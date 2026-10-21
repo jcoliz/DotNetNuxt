@@ -115,27 +115,27 @@ public class TerseConsoleLogFormatterTests
     }
 
     [Test]
-    public void Write_by_default_preserves_terse_exception_output()
+    public void Write_by_default_indents_terse_exception_stack_trace()
     {
         var exception = CreateException();
 
         var output = Format(new TerseConsoleLogOptions(), exception);
 
         var expected = $"                EXCEPTION InvalidOperationException: Outer failure{Environment.NewLine}"
-            + $"{exception.StackTrace}{Environment.NewLine}{Environment.NewLine}";
+            + $"\t{exception.StackTrace?.Replace("\n", "\n\t")}{Environment.NewLine}{Environment.NewLine}";
         Assert.That(output, Does.EndWith(expected));
         Assert.That(output, Does.Not.Contain("Inner failure"));
     }
 
     [Test]
-    public void Write_with_full_exception_includes_exact_exception_string()
+    public void Write_with_full_exception_includes_indented_exception_string()
     {
         var exception = CreateException();
 
         var output = Format(new TerseConsoleLogOptions { IncludeFullException = true }, exception);
 
         Assert.That(output, Does.EndWith(
-            $"{exception}{Environment.NewLine}{Environment.NewLine}"));
+            $"{exception.ToString().Replace("\n", "\n\t")}{Environment.NewLine}{Environment.NewLine}"));
         Assert.That(output, Does.Contain("Inner failure"));
         Assert.That(output, Does.Not.Contain("                EXCEPTION"));
     }
@@ -149,7 +149,42 @@ public class TerseConsoleLogFormatterTests
         var output = Format(new TerseConsoleLogOptions { IncludeFullException = true }, exception);
 
         Assert.That(output, Does.EndWith(
-            $"{exception}{Environment.NewLine}{Environment.NewLine}"));
+            $"{exception.ToString().Replace("\n", "\n\t")}{Environment.NewLine}{Environment.NewLine}"));
+    }
+
+    [TestCase("\n")]
+    [TestCase("\r\n")]
+    public void Write_indents_message_continuation_lines_and_preserves_line_endings(string newline)
+    {
+        var message = $"First line{newline}Second line{newline}{newline}Fourth line{newline}";
+
+        var output = Format(new TerseConsoleLogOptions(), null, message: message);
+
+        Assert.That(output, Does.EndWith(
+            $" [0042] Tests.Category: First line{newline}\tSecond line{newline}\t{newline}\tFourth line{newline}\t{Environment.NewLine}"));
+    }
+
+    [TestCase(false, "\n")]
+    [TestCase(false, "\r\n")]
+    [TestCase(true, "\n")]
+    [TestCase(true, "\r\n")]
+    public void Write_indents_multiline_exception_messages(bool includeFullException, string newline)
+    {
+        var exception = new InvalidOperationException($"First line{newline}Second line");
+
+        var output = Format(new TerseConsoleLogOptions { IncludeFullException = includeFullException }, exception);
+
+        Assert.That(output, Does.Contain($"First line{newline}\tSecond line"));
+        if (includeFullException)
+        {
+            Assert.That(output, Does.EndWith(
+                $"System.InvalidOperationException: First line{newline}\tSecond line{Environment.NewLine}{Environment.NewLine}"));
+        }
+        else
+        {
+            Assert.That(output, Does.EndWith(
+                $"                EXCEPTION InvalidOperationException: First line{newline}\tSecond line{Environment.NewLine}\t{Environment.NewLine}{Environment.NewLine}"));
+        }
     }
 
     [TestCase(false)]
@@ -163,12 +198,13 @@ public class TerseConsoleLogFormatterTests
     }
 
     private static string Format(
-        TerseConsoleLogOptions options, Exception? exception, IExternalScopeProvider? scopeProvider = null)
+        TerseConsoleLogOptions options, Exception? exception, IExternalScopeProvider? scopeProvider = null,
+        string message = "Log message")
     {
         using var formatter = new TerseConsoleLogFormatter(Options.Create(options));
         using var writer = new StringWriter();
         var entry = new LogEntry<string>(
-            LogLevel.Error, "Tests.Category", new EventId(42), "Log message",
+            LogLevel.Error, "Tests.Category", new EventId(42), message,
             exception, (state, _) => state);
 
         formatter.Write(in entry, scopeProvider, writer);

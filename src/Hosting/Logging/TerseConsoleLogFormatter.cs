@@ -18,6 +18,8 @@ namespace DotNetNuxt.Hosting.Logging;
 ///
 /// One thing to be aware of, we do use the TestName which is set by
 /// the test correlation middleware during test execution.
+///
+/// Continuation lines in messages and exceptions are indented with a tab.
 /// </remarks>
 public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDisposable
 {
@@ -121,24 +123,19 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
                 ? $" {traceId}"
                 : string.Empty
         );
-        textWriter.WriteLine(message);
+        textWriter.WriteLine(IndentContinuationLines(message));
 
         if (logEntry.Exception != null)
         {
             if (_options.IncludeFullException)
             {
-                textWriter.WriteLine(logEntry.Exception.ToString());
+                textWriter.WriteLine(IndentContinuationLines(logEntry.Exception.ToString()));
             }
             else
             {
-                textWriter.WriteLine
-                (
-                    // INF 02/21 02:02:48 [1003] Views.Shop: OK 0 items in 0 super groups
-                    "                EXCEPTION {0}: {1}",
-                    logEntry.Exception.GetType().Name,
-                    logEntry.Exception.Message
-                );
-                textWriter.WriteLine(logEntry.Exception.StackTrace);
+                var exceptionText = $"                EXCEPTION {logEntry.Exception.GetType().Name}: {logEntry.Exception.Message}"
+                    + Environment.NewLine + logEntry.Exception.StackTrace;
+                textWriter.WriteLine(IndentContinuationLines(exceptionText));
             }
             textWriter.WriteLine();
         }
@@ -150,7 +147,11 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
                 textWriter.WriteLine("    {0}: {1}", kvp.Key, kvp.Value);
             }
         }
+
     }
+
+    private static string IndentContinuationLines(string text) => text.Replace("\n", "\n\t");
+
     /*
      * EXAMPLE SCOPES:
         SpanId: b6e2eeaa4c526aa4
@@ -190,7 +191,8 @@ public sealed class TerseConsoleLogOptions : ConsoleFormatterOptions
 
     /// <summary>
     /// Gets or sets whether to render exceptions using their full string representation,
-    /// including inner exceptions and their stack traces. Defaults to false.
+    /// including inner exceptions and their stack traces, with tab-indented continuation
+    /// lines. Defaults to false.
     /// </summary>
     /// <remarks>
     /// Leave disabled for terse console output when another logging sink, such as
