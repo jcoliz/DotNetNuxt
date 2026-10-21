@@ -11,7 +11,7 @@ namespace DotNetNuxt.AspNetCore.Controllers;
 /// </summary>
 /// <remarks>
 /// Domain-agnostic. Could be broken out into separate reusable library.
-/// 
+///
 /// This is a controller and not a simple endpoint so it gets picked up by the frontend API generator.
 /// </remarks>
 /// <param name="options">Where to get version from</param>
@@ -47,7 +47,7 @@ public partial class VersionController(IOptions<VersionOptions> options, ILogger
     [LoggerMessage(EventId = 1, Level = LogLevel.Information, Message = "{Location}: OK {Version}")]
     private static partial void LogVersionOK(ILogger logger, string version, [CallerMemberName] string location = "");
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Information, Message = "{Location}: Not Found")]
+    [LoggerMessage(EventId = 2, Level = LogLevel.Warning, Message = "{Location}: Not Found")]
     private static partial void LogVersionNotFound(ILogger logger, [CallerMemberName] string location = "");
 
     #endregion
