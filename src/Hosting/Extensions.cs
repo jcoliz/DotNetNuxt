@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 using DotNetNuxt.Hosting.Options;
 
@@ -19,8 +21,16 @@ public static class HostingExtensions
 
     public static IServiceCollection AddStandardCorsPolicy(this IServiceCollection services, string[] allowedOrigins)
     {
-        services.AddCors(options =>
+        // No logger exists at registration time, so resolve one lazily from DI
+        services.AddOptions<CorsOptions>().Configure<ILoggerFactory>((options, loggerFactory) =>
         {
+            if (allowedOrigins is null || allowedOrigins.Length == 0)
+            {
+                loggerFactory.CreateLogger("DotNetNuxt.Hosting.Cors")
+                    .LogWarning("No allowed origins specified; CORS policy not configured");
+                return;
+            }
+
             options.AddDefaultPolicy(policy =>
             {
                 policy.WithOrigins(allowedOrigins)
@@ -32,6 +42,8 @@ public static class HostingExtensions
                     .WithExposedHeaders("content-disposition");
             });
         });
+
+        services.AddCors();
 
         return services;
     }
