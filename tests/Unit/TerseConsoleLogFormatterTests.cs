@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using DotNetNuxt.Hosting.Logging;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,68 @@ namespace DotNetNuxt.Tests.Unit;
 
 public class TerseConsoleLogFormatterTests
 {
+    [Test]
+    public void Timestamp_options_preserve_existing_defaults()
+    {
+        var options = new TerseConsoleLogOptions();
+
+        Assert.That(options.TimestampFormat, Is.EqualTo("MM/dd HH:mm:ss"));
+        Assert.That(options.UseUtcTimestamp, Is.False);
+    }
+
+    [Test]
+    public void Write_by_default_preserves_timestamp_format_and_header_spacing()
+    {
+        var output = Format(new TerseConsoleLogOptions(), null);
+
+        Assert.That(output, Does.Match(
+            @"^ERR \d{2}/\d{2} \d{2}:\d{2}:\d{2} \[0042\] Tests\.Category: Log message"));
+    }
+
+    [Test]
+    public void Write_honors_custom_timestamp_format()
+    {
+        var output = Format(new TerseConsoleLogOptions { TimestampFormat = "'custom timestamp'" }, null);
+
+        Assert.That(output, Is.EqualTo(
+            $"ERR custom timestamp [0042] Tests.Category: Log message{Environment.NewLine}"));
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void Write_with_null_timestamp_format_omits_timestamp_and_separator(bool useUtcTimestamp)
+    {
+        var output = Format(new TerseConsoleLogOptions
+        {
+            TimestampFormat = null,
+            UseUtcTimestamp = useUtcTimestamp
+        }, null);
+
+        Assert.That(output, Is.EqualTo(
+            $"ERR [0042] Tests.Category: Log message{Environment.NewLine}"));
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void Write_honors_timestamp_timezone_and_renders_current_time(bool useUtcTimestamp)
+    {
+        var before = DateTimeOffset.UtcNow;
+
+        var output = Format(new TerseConsoleLogOptions
+        {
+            TimestampFormat = "O",
+            UseUtcTimestamp = useUtcTimestamp
+        }, null);
+
+        var after = DateTimeOffset.UtcNow;
+        var timestampText = output["ERR ".Length..output.IndexOf(" [0042]", StringComparison.Ordinal)];
+        var timestamp = DateTimeOffset.ParseExact(timestampText, "O", CultureInfo.InvariantCulture);
+
+        Assert.That(timestamp, Is.InRange(before, after));
+        Assert.That(timestamp.Offset, Is.EqualTo(
+            useUtcTimestamp ? TimeSpan.Zero : TimeZoneInfo.Local.GetUtcOffset(timestamp)));
+    }
+
     [Test]
     public void IncludeTraceId_defaults_to_false()
     {

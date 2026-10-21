@@ -107,11 +107,17 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
             }
         }, typeof(TState));
 
+        textWriter.Write(logEntry.LogLevel.ToString().ToUpper()[0..3]);
+        if (_options.TimestampFormat is string timestampFormat)
+        {
+            var timestamp = _options.UseUtcTimestamp ? DateTimeOffset.UtcNow : DateTimeOffset.Now;
+            textWriter.Write(' ');
+            textWriter.Write(timestamp.ToString(timestampFormat));
+        }
+
         textWriter.Write
         (
-            "{0} {1} [{2:D4}] {3}{4}{5}: ",
-            logEntry.LogLevel.ToString().ToUpper()[0..3],
-            DateTimeOffset.Now.ToString("MM/dd HH:mm:ss"),
+            " [{0:D4}] {1}{2}{3}: ",
             category.StartsWith("Microsoft")
                 ? "****"
                 : logEntry.EventId.Id.ToString("D4"),
@@ -178,6 +184,19 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
 /// </summary>
 public sealed class TerseConsoleLogOptions : ConsoleFormatterOptions
 {
+    /// <summary>
+    /// Creates options with the default local timestamp format, "MM/dd HH:mm:ss".
+    /// </summary>
+    /// <remarks>
+    /// Set the inherited TimestampFormat to customize timestamps, or null to omit
+    /// them. Header spacing is supplied by the formatter, so no trailing space is
+    /// needed. Set UseUtcTimestamp to true to use UTC instead of local time.
+    /// </remarks>
+    public TerseConsoleLogOptions()
+    {
+        TimestampFormat = "MM/dd HH:mm:ss";
+    }
+
     /// <summary>
     /// Gets or sets whether to include the scope's TraceId after the category
     /// on the main log line. Defaults to false.

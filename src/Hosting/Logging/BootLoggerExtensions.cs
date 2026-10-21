@@ -17,7 +17,11 @@ public static class BootLoggerExtensions
         => LoggerFactory.Create(builder =>
         {
             builder.SetMinimumLevel(LogLevel.Debug);
-            builder.AddTerseConsoleLogFormatter(options => options.IncludeScopes = false);
+            builder.AddTerseConsoleLogFormatter(options =>
+            {
+                options.IncludeScopes = false;
+                options.IncludeFullException = true;
+            });
             builder.AddConsole();
 
             configure?.Invoke(builder);
