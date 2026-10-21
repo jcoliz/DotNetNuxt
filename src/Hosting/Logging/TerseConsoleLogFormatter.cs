@@ -59,6 +59,7 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
 
         var category = logEntry.Category;
         var testName = default(string);
+        var traceId = default(string);
 
         var collectedScopes = new List<KeyValuePair<string, object>>();
 
@@ -89,13 +90,24 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
                     testName = kvp.Value?.ToString();
                 }
 
+                if (_options.IncludeTraceId && traceId == null)
+                {
+                    foreach (var kvp in values)
+                    {
+                        if (kvp.Key == "TraceId" && traceId == null)
+                        {
+                            traceId = kvp.Value?.ToString();
+                        }
+                    }
+                }
+
                 collectedScopes.AddRange(values);
             }
         }, typeof(TState));
 
         textWriter.Write
         (
-            "{0} {1} [{2:D4}] {3}{4}: ",
+            "{0} {1} [{2:D4}] {3}{4}{5}: ",
             logEntry.LogLevel.ToString().ToUpper()[0..3],
             DateTimeOffset.Now.ToString("MM/dd HH:mm:ss"),
             category.StartsWith("Microsoft")
@@ -104,7 +116,10 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
             testName != null
                 ? $"/{testName}/ "
                 : string.Empty,
-            category
+            category,
+            !string.IsNullOrEmpty(traceId)
+                ? $" {traceId}"
+                : string.Empty
         );
         textWriter.WriteLine(message);
 
@@ -162,6 +177,17 @@ public sealed partial class TerseConsoleLogFormatter : ConsoleFormatter, IDispos
 /// </summary>
 public sealed class TerseConsoleLogOptions : ConsoleFormatterOptions
 {
+    /// <summary>
+    /// Gets or sets whether to include the scope's TraceId after the category
+    /// on the main log line. Defaults to false.
+    /// </summary>
+    /// <remarks>
+    /// Independent of IncludeScopes, which controls the separate scope dump.
+    /// Uses the first non-null TraceId from outermost to innermost scopes.
+    /// Missing or empty trace IDs do not change the output.
+    /// </remarks>
+    public bool IncludeTraceId { get; set; } = false;
+
     /// <summary>
     /// Gets or sets whether to render exceptions using their full string representation,
     /// including inner exceptions and their stack traces. Defaults to false.
