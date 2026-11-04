@@ -100,6 +100,13 @@ public interface IDataProvider
     /// <param name="query">Query to execute</param>
     /// <returns>List of items</returns>
     Task<List<T>> ToListNoTrackingAsync<T>(IQueryable<T> query) where T : class;
+
+    /// <summary>
+    /// Execute ToList query asynchronously, with tracking
+    /// </summary>
+    /// <typeparam name="T">Reference type of entities being queried</typeparam>
+    /// <param name="query">Query to execute</param>
+    /// <returns>List of items</returns>
     Task<List<T>> ToListAsync<T>(IQueryable<T> query);
 
     /// <summary>

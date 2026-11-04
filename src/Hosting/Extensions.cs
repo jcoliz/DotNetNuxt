@@ -8,8 +8,16 @@ using DotNetNuxt.Hosting.Options;
 
 namespace DotNetNuxt.Hosting;
 
+/// <summary>
+/// Extension methods for configuring hosting-related services.
+/// </summary>
 public static class HostingExtensions
 {
+    /// <summary>
+    /// Add standard startup options to the host application builder.
+    /// </summary>
+    /// <param name="builder">The host application builder to configure.</param>
+    /// <returns>The configured startup options.</returns>
     public static StartupOptions AddStandardStartupOptions(this IHostApplicationBuilder builder)
     {
         StartupOptions startupOptions = new();
@@ -19,6 +27,12 @@ public static class HostingExtensions
         return startupOptions;
     }
 
+    /// <summary>
+    /// Add a standard CORS policy to the service collection.
+    /// </summary>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="allowedOrigins">The list of allowed origins for the CORS policy.</param>
+    /// <returns>The configured service collection.</returns>
     public static IServiceCollection AddStandardCorsPolicy(this IServiceCollection services, string[] allowedOrigins)
     {
         // No logger exists at registration time, so resolve one lazily from DI

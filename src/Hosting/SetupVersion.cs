@@ -3,6 +3,9 @@ using System.Reflection;
 
 namespace DotNetNuxt.Hosting;
 
+/// <summary>
+/// Helper methods for retrieving version information from assemblies.
+/// </summary>
 public static partial class VersionHelpers
 {
     /// <summary>
