@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Data;
+using System.Linq.Expressions;
 
 namespace DotNetNuxt.Abstractions;
 
@@ -173,6 +174,23 @@ public interface IDataProvider
         Expression<Func<TEntity, TProperty>> propertySelector,
         TProperty newValue,
         CancellationToken cancellationToken) where TEntity : IModel;
+
+    #endregion
+
+    #region Transaction Operations
+
+    /// <summary>
+    /// Runs a persistence operation atomically, committing its result or rolling back on failure.
+    /// </summary>
+    /// <typeparam name="TResult">The operation result.</typeparam>
+    /// <param name="operation">Operation to execute within the transaction.</param>
+    /// <param name="cancellationToken">Token checked when starting and committing the transaction.</param>
+    /// <param name="isolationLevel">Optional isolation level; omitted to use the provider default.</param>
+    /// <returns>The operation result after its transaction commits.</returns>
+    /// <exception cref="DataConflictException">
+    /// A concurrent operation prevented the transaction from committing.
+    /// </exception>
+    Task<TResult> ExecuteInTransactionAsync<TResult>(Func<CancellationToken,Task<TResult>> operation, CancellationToken cancellationToken = default, IsolationLevel? isolationLevel = null);
 
     #endregion
 }

@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
+using System.Data;
 
 namespace DotNetNuxt.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ public abstract class StandardIdentityDbContext(DbContextOptions options) : Iden
         => base.Set<T>();
 
     /// <summary>
-    /// Get a query of <typeparamref name="TEntity"/> entities, 
+    /// Get a query of <typeparamref name="TEntity"/> entities,
     /// including <typeparamref name="TProperty"/> navigation properties
     /// </summary>
     /// <typeparam name="TEntity"></typeparam>
@@ -36,7 +37,7 @@ public abstract class StandardIdentityDbContext(DbContextOptions options) : Iden
 
     #region Modifiers
 
-    void IDataProvider.Add(IModel item) 
+    void IDataProvider.Add(IModel item)
         => base.Add(item);
 
     void IDataProvider.AddRange(IEnumerable<IModel> items)
@@ -100,4 +101,38 @@ public abstract class StandardIdentityDbContext(DbContextOptions options) : Iden
     }
 
     #endregion
+
+    #region Transaction Operations
+
+    /// <inheritdoc />
+    async Task<TResult> IDataProvider.ExecuteInTransactionAsync<TResult>(
+        Func<CancellationToken,Task<TResult>> operation,
+        CancellationToken cancellationToken,
+        IsolationLevel? isolationLevel)
+    {
+        await using var transaction = isolationLevel.HasValue
+            ? await Database.BeginTransactionAsync(isolationLevel.Value, cancellationToken)
+            : await Database.BeginTransactionAsync(cancellationToken);
+        try
+        {
+            var result = await operation(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+            return result;
+        }
+        catch (Exception exception) when (IsConcurrencyException(exception))
+        {
+            throw new DataConflictException(exception);
+        }
+    }
+
+    /// <summary>
+    /// Determines whether the given exception represents a concurrency conflict.
+    /// </summary>
+    /// <param name="exception">The exception to check.</param>
+    /// <returns>True if the exception represents a concurrency conflict; otherwise, false.</returns>
+    protected virtual bool IsConcurrencyException(Exception exception)
+        => exception is DbUpdateConcurrencyException;
+
+    #endregion
+
 }
