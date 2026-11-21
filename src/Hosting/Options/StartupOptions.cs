@@ -10,6 +10,9 @@ namespace DotNetNuxt.Hosting.Options;
 /// </remarks>
 public record StartupOptions
 {
+    /// <summary>
+    /// The configuration section name for startup options.
+    /// </summary>
     public static readonly string Section = "Startup";
 
     /// <summary>
