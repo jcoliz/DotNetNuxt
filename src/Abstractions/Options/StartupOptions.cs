@@ -1,6 +1,6 @@
 // Copyright (C) 2024 James Coliz, Jr. <jcoliz@outlook.com> All rights reserved
 
-namespace DotNetNuxt.Hosting.Options;
+namespace DotNetNuxt.Abstractions.Options;
 
 /// <summary>
 /// Configuration options for program startup
