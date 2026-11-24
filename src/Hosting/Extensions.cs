@@ -4,7 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 
-using DotNetNuxt.Hosting.Options;
+using DotNetNuxt.Abstractions.Options;
 
 namespace DotNetNuxt.Hosting;
 

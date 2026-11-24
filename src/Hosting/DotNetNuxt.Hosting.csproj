@@ -7,4 +7,8 @@
 		<PackageTags>dotnet;hosting;nuxt;extensions;web</PackageTags>
 	</PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Abstractions\DotNetNuxt.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>
